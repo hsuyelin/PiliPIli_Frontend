@@ -1,0 +1,23 @@
+# Logging configuration
+LogLevel: "INFO" # Log level (e.g., info, debug, warn, error)
+
+# Encryption settings
+Encipher: "vPQC5LWCN2CW2opz" # Key used for encryption and obfuscation
+
+# Emby server configuration
+Emby:
+  url: "http://127.0.0.1" # The base URL for the Emby server
+  port: 8096
+  apiKey: "6a15d65893024675ba89ffee165f8f1c"  # API key for accessing the Emby server
+
+# Backend streaming configuration
+Backend:
+    url: "https://streamer.xxxxxxxx.com/stream" # The backend URL for streaming service
+    storageBasePath: "/mnt/anime"
+
+# Streaming configuration
+PlayURLMaxAliveTime: 21600 # Maximum lifetime of the play URL in seconds (e.g., 6 hours)
+
+# Server configuration
+Server:
+  port: 60001
