@@ -4,7 +4,7 @@
 ![Commit Activity](https://img.shields.io/github/commit-activity/m/hsuyelin/PiliPili_Frontend/main) ![Top Language](https://img.shields.io/github/languages/top/hsuyelin/PiliPili_Frontend) ![Github License](https://img.shields.io/github/license/hsuyelin/PiliPili_Frontend)
 
 
-[中文版本](https://github.com/hsuyelin/PiliPili_Frontend/blob/main/READEME_CN.md)
+[中文版本](https://github.com/hsuyelin/PiliPili_Frontend/blob/main/README_CN.md)
 
 ### Introduction
 
