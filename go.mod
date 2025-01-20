@@ -3,6 +3,7 @@ module PiliPili_Frontend
 go 1.23
 
 require (
+	github.com/6tail/lunar-go v1.3.15
 	github.com/allegro/bigcache v1.2.1
 	github.com/fatih/color v1.18.0
 	github.com/gin-gonic/gin v1.10.0
