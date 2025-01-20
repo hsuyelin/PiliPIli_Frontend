@@ -25,7 +25,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: |
-            ${{ secrets.DOCKER_USERNAME }}/pilipili_frontened
+            ${{ secrets.DOCKER_USERNAME }}/pilipili_frontend
           tags: |
             type=raw,value=${{ env.app_version }}
             type=raw,value=latest
