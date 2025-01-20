@@ -6,14 +6,14 @@
 
 [中文版本](https://github.com/hsuyelin/PiliPili_Frontend/blob/main/README_CN.md)
 
-### Introduction
+## Introduction
 
 1. This project is a frontend application for separating Emby media service playback into frontend and backend components. It works in conjunction with the playback backend [PiliPili Playback Backend](https://github.com/hsuyelin/PiliPili_Backend).
 2. This program is largely based on [YASS-Frontend](https://github.com/FacMata/YASS-Fronted). The original version was implemented in `Python`. To achieve better compatibility, it has been rewritten in `Go` and optimized to enhance usability.
 
 ------
 
-### Principles
+## Principles
 
 1. Use a specific `nginx` configuration (refer to [nginx.conf](https://github.com/hsuyelin/PiliPili_Frontend/blob/main/nginx/nginx.conf)) to redirect Emby playback URLs to a designated port.
 2. The program listens for requests arriving at the port and extracts the `MediaSourceId` and `ItemId`.
@@ -26,7 +26,7 @@
 
 ------
 
-### Features
+## Features
 
 - **Compatible with all Emby server versions**.
 - **Supports high concurrency**, handling multiple requests simultaneously.
@@ -36,7 +36,7 @@
 
 ------
 
-### Configuration File
+## Configuration File
 
 ```yaml
 # Logging configuration
@@ -64,63 +64,62 @@ Server:
   port: 60001
 ```
 
-#### Key Settings:
-
-1. **`LogLevel`**: Logging verbosity levels:
-
-	- `WARN`: Minimal logging unless debugging is insufficient.
-	- `DEBUG`: Logs `DEBUG`, `INFO`, and `ERROR`. Recommended for debugging.
-	- `INFO`: Logs `INFO` and `ERROR`. Adequate for normal operations.
-	- `ERROR`: For stable, unattended setups, this minimizes log entries.
-
-2. **`Encipher`**: A 16-character encryption key for obfuscating signatures. **Must match between frontend and backend.**
-
-3. **`Emby` Configuration**:
-
-	- `url`: The Emby server's base URL (e.g., `http://127.0.0.1` for local deployment).
-	- `port`: The Emby server port, typically `8096`.
-	- `apiKey`: API key for media file path requests.
-
-4. **`Backend` Configuration**:
-
-	- `url`: Remote streaming service's address (e.g., `http://ip:port` for HTTP, or `https://domain.com` for HTTPS on port `443`).
-
-	- ```storageBasePath```: Relative path to map Emby storage paths with backend storage paths. For example:
-		- Local `EmbyPath`: `/mnt/anime/OnePiece/Season 22/file.mkv`.
-		- If `/mnt` is to be hidden, set `storageBasePath: "/mnt"`.
-		- Ensure matching backend configuration ([details here](https://github.com/hsuyelin/PiliPili_Backend)).
-
-5. **`PlayURLMaxAliveTime`**: The maximum lifetime of playback URLs (in seconds). Typically set to `21600` (6 hours) to prevent link misuse.
-
-6. **`Server` Configuration**:
-
-	- `port`: Listening port, default is `60001`.
+* SpecialMedias: Used to redirect media with special significance, such as content related to Chinese traditional holidays or historical events. Currently supported events include (There's no need for that. Just set it to null.):
+	* MediaMissing: Redirects to a default media file if the server file is missing.
+	* September18: Commemorates the "Mukden Incident" of September 18, a significant historical date for China, promoting remembrance of history, peace, and perseverance.
+	* October1：Celebrates October 1, China's National Day.
+	* December13: Commemorates China's National Memorial Day on December 13, urging remembrance of history, peace, and perseverance.
 
 ------
 
-### Usage
+## How to Use
 
-#### Step 1: Install Go Environment
+### 1. Install Using Docker (Recommended)
 
-##### 1.1 Remove Existing Go Installation
+#### 1.1 Create a Docker Directory
+
+```shell
+mkdir -p /data/docker/pilipili_frontend
+```
+
+#### 1.2 Create Configuration Folder and File
+
+```shell
+cd /data/docker/pilipili_frontend
+mkdir -p config && cd config
+```
+
+Copy [config.yaml](https://github.com/hsuyelin/PiliPili_Frontend/blob/main/config.yaml) to the `config` folder and edit it as needed.
+
+#### 1.3 Create docker-compose.yaml
+
+Navigate back to the `/data/docker/pilipili_frontend` directory, and copy [docker-compose.yml](https://github.com/hsuyelin/PiliPili_Frontend/blob/main/docker/docker-compose.yml) to this directory.
+
+#### 1.4 Start the Container
+
+### 2. Manual Installation
+
+#### 2.1: Install Go Environment
+
+##### 2.1.1 Remove Existing Go Installation
 
 ```bash
 rm -rf /usr/local/go
 ```
 
-##### 1.2 Download and Install Latest Go Version
+##### 2.1.2 Download and Install Latest Go Version
 
 ```bash
 wget -q -O /tmp/go.tar.gz https://go.dev/dl/go1.23.5.linux-amd64.tar.gz && tar -C /usr/local -xzf /tmp/go.tar.gz && rm /tmp/go.tar.gz
 ```
 
-##### 1.3 Add Go to Environment Variables
+##### 2.1.3 Add Go to Environment Variables
 
 ```bash
 echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc && source ~/.bashrc
 ```
 
-##### 1.4 Verify Installation
+##### 2.1.4 Verify Installation
 
 ```bash
 go version
@@ -129,7 +128,7 @@ go version
 
 ------
 
-#### Step 2: Clone the Frontend Repository
+#### 2.2: Clone the Frontend Repository
 
 Clone the repository into a directory, e.g., `/data/emby_fronted`.
 
@@ -139,13 +138,13 @@ git clone https://github.com/hsuyelin/PiliPili_Frontend.git /data/emby_fronted
 
 ------
 
-#### Step 3: Configure the Application
+#### 2.3: Configure the Application
 
 Edit the `config.yaml` file in the repository to match your setup.
 
 ------
 
-#### Step 4: Run the Application
+#### 2.4: Run the Application
 
 Run the program in the background:
 

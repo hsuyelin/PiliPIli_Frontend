@@ -86,14 +86,48 @@ Server:
 * PlayURLMaxAliveTime：播放链接的过期时间，单位是秒，一般是6小时（设置21600）就足够了，主要防止恶意抓包，导致链接一致可以被观看或者下载
 * Server：
 	* port: 需要监听的端口号，如果没有特殊需要，直接默认`60001`就可以了
+* SpecialMedias: 用来重定向一些特殊意义的媒体，比如中国传统节日新年等，目前支持的特殊意义媒体如下（没有这个需求，设置成空就行）：
+  * MediaMissing: 服务器文件丢失，显示默认的媒体文件
+  * September18: 中国的“九一八事变”纪念日，对中国人很有意义，勿忘国耻，砥砺前行，珍惜和平
+  * October1：10月1日，中国的国庆节
+  * December13: 中国的“国家公祭日”纪念日，对中国人很有意义，勿忘国耻，砥砺前行，珍惜和平
 
 ------
 
 ## 如何使用
 
-### 1. 安装Go环境
+### 1. Docker安装(推荐)
 
-#### 1.1 卸载本机的Go程序
+#### 1.1 创建docker文件夹
+
+```shell
+mkdir -p /data/docker/pilipili_frontend
+```
+
+#### 1.2 创建配置文件夹和配置文件
+
+```shell
+cd /data/docker/pilipili_frontend
+mkdir -p config && cd config
+```
+
+将 [config.yaml](https://github.com/hsuyelin/PiliPili_Frontend/blob/main/config.yaml) 复制到`config`文件夹中，并进行编辑
+
+#### 1.3 创建docker-compose.yaml
+
+返回到 `/data/docker/pilipili_frontend`目录，将 [docker-compose.yml](https://github.com/hsuyelin/PiliPili_Frontend/blob/main/docker/docker-compose.yml) 复制到该目录下
+
+#### 1.4 启动容器
+
+```shell
+docker-compose pull && docker-compose up -d
+```
+
+### 2. 手动安装
+
+#### 2.1 安装Go环境
+
+##### 2.1.1 卸载本机的Go程序
 
 强制删除本机安装的go，为防止`go`版本不匹配
 
@@ -101,25 +135,25 @@ Server:
 rm -rf /usr/local/go
 ```
 
-#### 1.2 下载并安装最新版本的Go程序
+##### 2.1.2 下载并安装最新版本的Go程序
 
 ```shell
 wget -q -O /tmp/go.tar.gz https://go.dev/dl/go1.23.5.linux-amd64.tar.gz && tar -C /usr/local -xzf /tmp/go.tar.gz && rm /tmp/go.tar.gz
 ```
 
-#### 1.3 将Go程序写入环境变量
+##### 2.1.3 将Go程序写入环境变量
 
 ```shell
 echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc && source ~/.bashrc
 ```
 
-#### 1.4 验证是否安装成功
+##### 2.1.4 验证是否安装成功
 
 ```shell
 go version #显示 go version go1.23.5 linux/amd64 就是安装成功
 ```
 
-### 2. 克隆前端程序组到本地
+#### 2.2 克隆前端程序组到本地
 
 假如你需要克隆到`/data/emby_fronted`这个目录
 
@@ -127,7 +161,7 @@ go version #显示 go version go1.23.5 linux/amd64 就是安装成功
 git clone https://github.com/hsuyelin/PiliPili_Frontend.git /data/emby_fronted
 ```
 
-### 3. 进入前端程序目录编辑配置文件
+#### 2.3 进入前端程序目录编辑配置文件
 
 ```yaml
 # Logging configuration
@@ -155,7 +189,7 @@ Server:
   port: 60001
 ```
 
-### 4. 运行程序
+#### 2.4 运行程序
 
 ```shell
 nohup go run main.go config.yaml > stream.log 2>&1 &
