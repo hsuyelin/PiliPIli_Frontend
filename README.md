@@ -97,6 +97,10 @@ Navigate back to the `/data/docker/pilipili_frontend` directory, and copy [docke
 
 #### 1.4 Start the Container
 
+```shell
+docker-compose pull && docker-compose up -d
+```
+
 ### 2. Manual Installation
 
 #### 2.1: Install Go Environment
