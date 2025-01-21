@@ -66,6 +66,7 @@ Server:
 
 # Special medias configuration
 SpecialMedias:
+   # The key values below can be filled as needed. If not required, they can be left empty.
    - key: "MediaMissing"
      name: "Default media for missing cases"
      mediaPath: "specialMedia/mediaMissing"
