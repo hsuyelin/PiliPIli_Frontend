@@ -30,7 +30,7 @@
 
 - **Compatible with all Emby server versions**.
 - **Supports high concurrency**, handling multiple requests simultaneously.
-- **Support for deploying Emby server with Strm.**
+- **Support for deploying Emby server with `strm`.**
 - **Request caching**, enabling fast responses for identical `MediaSourceId` and `ItemId` requests, reducing playback startup time.
 - **Link signing**, where the frontend generates and the backend verifies the signature. Mismatched signatures result in a `401 Unauthorized` error.
 - **Link expiration**, with an expiration time embedded in the signature to prevent unauthorized usage and continuous theft via packet sniffing.
