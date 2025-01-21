@@ -60,6 +60,34 @@ PlayURLMaxAliveTime: 21600 # Maximum lifetime of the play URL in seconds (e.g., 
 # Server configuration
 Server:
   port: 60001
+
+# Special medias configuration
+SpecialMedias:
+	- key: "MediaMissing"
+	  name: "Default media for missing cases"
+	  mediaPath: "specialMedia/mediaMissing"
+	  itemId: "mediaMissing-item-id"
+	  mediaSourceID: "mediaMissing-media-source-id"
+	- key: "September18"
+	  name: "September 18 - Commemorative Media"
+	  mediaPath: "specialMedia/september18"
+	  itemId: "september18-item-id"
+	  mediaSourceID: "september18-media-source-id"
+	- key: "October1"
+	  name: "October 1 - National Day Media"
+	  mediaPath: "specialMedia/october1"
+	  itemId: "october1-item-id"
+	  mediaSourceID: "october1-media-source-id"
+	- key: "December13"
+	  name: "December 13 - Nanjing Massacre Commemoration"
+	  mediaPath: "specialMedia/december13"
+	  itemId: "december13-item-id"
+	  mediaSourceID: "december13-media-source-id"
+	- key: "ChineseNewYearEve"
+	  name: "Chinese New Year's Eve Media"
+	  mediaPath: "specialMedia/chinesenewyeareve"
+	  itemId: "chinesenewyeareve-item-id"
+	  mediaSourceID: "chinesenewyeareve-media-source-id"
 ```
 
 * LogLevel：打印日志的等级

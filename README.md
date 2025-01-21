@@ -63,13 +63,68 @@ PlayURLMaxAliveTime: 21600 # Maximum lifetime of the play URL in seconds (e.g., 
 # Server configuration
 Server:
   port: 60001
+
+# Special medias configuration
+SpecialMedias:
+	- key: "MediaMissing"
+	  name: "Default media for missing cases"
+	  mediaPath: "specialMedia/mediaMissing"
+	  itemId: "mediaMissing-item-id"
+	  mediaSourceID: "mediaMissing-media-source-id"
+	- key: "September18"
+	  name: "September 18 - Commemorative Media"
+	  mediaPath: "specialMedia/september18"
+	  itemId: "september18-item-id"
+	  mediaSourceID: "september18-media-source-id"
+	- key: "October1"
+	  name: "October 1 - National Day Media"
+	  mediaPath: "specialMedia/october1"
+	  itemId: "october1-item-id"
+	  mediaSourceID: "october1-media-source-id"
+	- key: "December13"
+	  name: "December 13 - Nanjing Massacre Commemoration"
+	  mediaPath: "specialMedia/december13"
+	  itemId: "december13-item-id"
+	  mediaSourceID: "december13-media-source-id"
+	- key: "ChineseNewYearEve"
+	  name: "Chinese New Year's Eve Media"
+	  mediaPath: "specialMedia/chinesenewyeareve"
+	  itemId: "chinesenewyeareve-item-id"
+	  mediaSourceID: "chinesenewyeareve-media-source-id"
 ```
 
-* SpecialMedias: Used to redirect media with special significance, such as content related to Chinese traditional holidays or historical events. Currently supported events include (There's no need for that. Just set it to null.):
-	* MediaMissing: Redirects to a default media file if the server file is missing.
-	* September18: Commemorates the "Mukden Incident" of September 18, a significant historical date for China, promoting remembrance of history, peace, and perseverance.
-	* October1：Celebrates October 1, China's National Day.
-	* December13: Commemorates China's National Memorial Day on December 13, urging remembrance of history, peace, and perseverance.
+- **LogLevel**: The log level for printing logs
+	- `WARN`: Displays all logs unless enabling `DEBUG` does not meet the needs; generally, this log level is not recommended.
+	- `DEBUG`: Displays logs at the `DEBUG`/`INFO`/`ERROR` levels; if debugging is needed, it is recommended to use this level.
+	- `INFO`: Displays logs at the `INFO`/`ERROR` levels; this level is usually sufficient under normal circumstances.
+	- `ERROR`: If the system is stable enough and has reached an unattended stage, this level can be used to reduce the number of logs.
+
+- **Encipher**: The encryption factor, which is a 16-character string used for signature obfuscation. **The frontend and backend must remain consistent**.
+
+- **Emby**:
+	- **url**: The address where the Emby service is deployed. If the frontend application and the Emby service are on the same machine, `http://127.0.0.1` can be used.
+	- **port**: The port where the Emby service is deployed, usually `8096`. Configure as needed.
+	- **apikey**: The `APIKey` for the Emby service, used to retrieve media file URLs from the Emby service.
+
+- **Backend**:
+	- **url**: The URL for remote streaming.
+		- If using `http`, the port number must be included, e.g., `http://ip:port`.
+		- If using `https` on port `443`, the port number can be omitted, e.g., `https://streamer.xxxxxxxx.com/stream`.
+	- **storageBasePath**:
+		- **Prerequisite**: The frontend needs to map the storage path in the Emby service to the actual storage file path on the backend.
+		- The relative path of the directory to be hidden, relative to the remote mounted directory. For example: If the local `EmbyPath` is `/mnt/anime/动漫/海贼王 (1999)/Season 22/37854 S22E1089 2160p.B-Global.mkv`, but you want to hide the `/mnt` part, enter `/mnt` in the frontend's `storageBasePath`. Correspondingly, in the [backend configuration](https://github.com/hsuyelin/PiliPili_Backend), set `StorageBasePath` to `/mnt`.
+		- In other words, the part of the path you want to hide must be configured in the backend.
+
+- **PlayURLMaxAliveTime**: The expiration time for playback links, in seconds. Typically, 6 hours (set to `21600`) is sufficient to prevent malicious packet capturing, which could otherwise allow the same link to be watched or downloaded indefinitely.
+
+- **Server**:
+	- **port**: The port to be listened on. If there are no special requirements, the default value `60001` can be used.
+
+- **SpecialMedias**: Used to redirect media with special significance, such as content related to Chinese traditional holidays or historical events. Currently supported events include (There's no need for that. Just set it to null.):
+	- **MediaMissing**: Redirects to a default media file if the server file is missing.
+	- **September18**: Commemorates the "Mukden Incident" of September 18, a significant historical date for China, promoting remembrance of history, peace, and perseverance.
+	- **October1**：Celebrates October 1, China's National Day.
+	- **December13**: Commemorates China's National Memorial Day on December 13, urging remembrance of history, peace, and perseverance.
 
 ------
 
