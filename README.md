@@ -9,7 +9,7 @@
 ## Introduction
 
 1. This project is a frontend application for separating Emby media service playback into frontend and backend components. It works in conjunction with the playback backend [PiliPili Playback Backend](https://github.com/hsuyelin/PiliPili_Backend).
-2. This program is largely based on [YASS-Frontend](https://github.com/FacMata/YASS-Fronted). The original version was implemented in `Python`. To achieve better compatibility, it has been rewritten in `Go` and optimized to enhance usability.
+2. This program is largely based on [YASS-Frontend](https://github.com/FacMata/YASS-Frontend). The original version was implemented in `Python`. To achieve better compatibility, it has been rewritten in `Go` and optimized to enhance usability.
 
 ------
 
@@ -30,6 +30,7 @@
 
 - **Compatible with all Emby server versions**.
 - **Supports high concurrency**, handling multiple requests simultaneously.
+- **Support for deploying Emby server with Strm.**
 - **Request caching**, enabling fast responses for identical `MediaSourceId` and `ItemId` requests, reducing playback startup time.
 - **Link signing**, where the frontend generates and the backend verifies the signature. Mismatched signatures result in a `401 Unauthorized` error.
 - **Link expiration**, with an expiration time embedded in the signature to prevent unauthorized usage and continuous theft via packet sniffing.

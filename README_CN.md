@@ -6,18 +6,18 @@
 ## 简介
 
 1. 本项目是实现Emby媒体服务播前后端分离的前端程序, 需要与播放分离后端 [PiliPili播放后端](https://github.com/hsuyelin/PiliPili_Backend) 一起配套使用。
-2. 本程序大部分参考了 [YASS-Fronted](https://github.com/FacMata/YASS-Fronted)，原版使用了`Python`，为了有更好的兼容性，将其修改为`Go`版本并在其基础上进行了优化，使其更加易用。
+2. 本程序大部分参考了 [YASS-Frontend](https://github.com/FacMata/YASS-Frontend)，原版使用了`Python`，为了有更好的兼容性，将其修改为`Go`版本并在其基础上进行了优化，使其更加易用。
 
 ------
 
 ## 原理
 
-* 通过配合指定的`nginx`配置(可参考[nginx.conf](https://github.com/hsuyelin/PiliPili_Frontend/blob/main/nginx/nginx.conf))，将Emby的播放链接重定向到指定的端口
-* 程序监听该端口过来的请求，获取对应的`MediaSourceId`，`ItemId`
-* 向`Emby`服务请求获取对应的文件相对路径 `EmbyPath`
-* 通过把配置文件中`Encipher`和过期时间`expireAt`进行加密获取签名`signature`
-* 将后端播放的远程地址`backendURL`与之前获取的`EmbyPath`和`signature`做拼接
-* 重定向到拼接后的地址交由后端处理
+- **通过配合指定的`nginx`配置(可参考[nginx.conf](https://github.com/hsuyelin/PiliPili_Frontend/blob/main/nginx/nginx.conf))，将Emby的播放链接重定向到指定的端口**
+- **程序监听该端口过来的请求，获取对应的`MediaSourceId`，`ItemId`**
+- **向`Emby`服务请求获取对应的文件相对路径 `EmbyPath`**
+- **通过把配置文件中`Encipher`和过期时间`expireAt`进行加密获取签名`signature`**
+- **将后端播放的远程地址`backendURL`与之前获取的`EmbyPath`和`signature`做拼接**
+- **重定向到拼接后的地址交由后端处理**
 
 ![sequenceDiagram](https://github.com/hsuyelin/PiliPili_Frontend/blob/main/img/sequenceDiagram_CN.png)
 
@@ -25,15 +25,12 @@
 
 ## 功能
 
-* 支持目前所有版本的Emby服务器
-
-* 支持请求多并发
-
-* 支持请求缓存，对相同`MediaSourceId`以及`ItemId`的请求可以快速响应，增加起播时间
-
-* 支持链接签名，由前端签名，后端校验，签名不匹配的会向客户端发送`401`错误
-
-* 支持链接过期，通过在签名中增加过期时间，防止被恶意抓包导致服务器被持续盗链
+- **支持目前所有版本的Emby服务器**
+- **支持请求多并发**
+- **支持使用Strm部署的Emby服务端**
+- **支持请求缓存，对相同`MediaSourceId`以及`ItemId`的请求可以快速响应，增加起播时间**
+- **支持链接签名，由前端签名，后端校验，签名不匹配的会向客户端发送`401`错误**
+- **支持链接过期，通过在签名中增加过期时间，防止被恶意抓包导致服务器被持续盗链**
 
 ------
 
