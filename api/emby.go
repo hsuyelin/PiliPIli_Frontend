@@ -32,9 +32,9 @@ func NewEmbyAPI() *EmbyAPI {
 }
 
 // GetMediaPath fetches the media file path from Emby using the provided item ID and MediaSourceID.
-func (api *EmbyAPI) GetMediaPath(itemID, mediaSourceID string) (string, error) {
+func (api *EmbyAPI) GetMediaPath(apiKey, itemID, mediaSourceID string) (string, error) {
 	url := fmt.Sprintf("%s/Items/%s/PlaybackInfo?MediaSourceId=%s&api_key=%s",
-		api.EmbyURL, itemID, mediaSourceID, api.APIKey)
+		api.EmbyURL, itemID, mediaSourceID, apiKey)
 
 	logger.Info("Fetching media path from Emby: %s", url)
 

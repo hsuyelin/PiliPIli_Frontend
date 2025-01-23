@@ -6,6 +6,7 @@ import (
 	"PiliPili_Frontend/config"
 	"PiliPili_Frontend/logger"
 	"PiliPili_Frontend/util"
+	"bytes"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"io"
@@ -19,6 +20,14 @@ import (
 // Cache instance for avoiding repeated processing.
 var cache *Cache
 var globalTimeChecker util.TimeChecker
+
+type RequestParameters struct {
+	EmbyApiKey    string // The API key for authenticating with the Emby server.
+	ItemId        string // The unique identifier of the media item.
+	MediaSourceID string // The identifier of the specific media source.
+	MediaPath     string // The file path to the media.
+	IsSpecialDate bool   // A flag indicating whether the request is for a special date or occasion.
+}
 
 // init initializes global variables such as cache and time checker.
 func init() {
@@ -39,26 +48,31 @@ func HandleStreamRequest(c *gin.Context) {
 	logRequestDetails(c)
 
 	// Fetch necessary parameters for processing the request.
-	itemID, mediaSourceID, mediaPath, isSpecialDate := fetchParameters(c)
-	if itemID == "" || mediaSourceID == "" {
+	requestParameters := fetchRequestParameters(c)
+
+	if requestParameters.EmbyApiKey == "" ||
+		requestParameters.ItemId == "" ||
+		requestParameters.MediaSourceID == "" {
+
 		return // Early exit if parameters are missing.
 	}
 
 	// Handle cache: Check if a valid streaming URL exists in the cache.
-	if _, found := handleCache(c, itemID, mediaSourceID); found {
+	if _, found := handleCache(c, requestParameters); found {
 		return
 	}
 
 	// Fetch media path if it is not a special date.
 	var err error
-	mediaPath, err = fetchMediaPathIfNeeded(itemID, mediaSourceID, mediaPath, isSpecialDate)
+	var mediaPath string
+	mediaPath, err = fetchMediaPathIfNeeded(requestParameters)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	// Generate and cache the streaming URL.
-	streamingURL, err := generateAndCacheURL(itemID, mediaSourceID, mediaPath)
+	streamingURL, err := generateAndCacheURL(mediaPath, requestParameters)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -70,27 +84,59 @@ func HandleStreamRequest(c *gin.Context) {
 	c.Status(http.StatusFound)
 }
 
-// fetchParameters retrieves parameters from the request or special date configuration.
-func fetchParameters(c *gin.Context) (string, string, string, bool) {
+// fetchRequestParameters retrieves parameters from the request or special date configuration.
+func fetchRequestParameters(c *gin.Context) RequestParameters {
 	currentTime := time.Now()
+
+	apiKey := c.Query("api_key")
+	if apiKey == "" {
+		apiKey = config.GetConfig().EmbyAPIKey
+	}
+
+	if apiKey == "" {
+		logger.Error("Missing emby api key")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing emby api key"})
+		return RequestParameters{}
+	}
+
+	logger.Debug("Emby api key: %s", apiKey)
 
 	// Check for special date configuration.
 	specialConfig := getMediaForSpecialDate(currentTime)
 	if specialConfig.IsValid() {
 		logger.Info("Special date detected. Using special configuration.")
-		return specialConfig.ItemId, specialConfig.MediaSourceID, specialConfig.MediaPath, true
+		return RequestParameters{
+			apiKey,
+			specialConfig.ItemId,
+			specialConfig.MediaSourceID,
+			specialConfig.MediaPath,
+			true,
+		}
 	}
 
 	// Retrieve parameters from the request.
 	itemID := c.Param("itemID")
 	mediaSourceID := c.Query("MediaSourceId")
+	logger.Debug("ItemID: %s, mediaSourceID: %s", itemID, mediaSourceID)
 	if itemID == "" || mediaSourceID == "" {
-		logger.Warn("Missing itemID or MediaSourceId")
+		logger.Error("Missing itemID or MediaSourceId")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing itemID or MediaSourceId"})
-		return "", "", "", false
+		return RequestParameters{
+			apiKey,
+			"",
+			"",
+			"",
+			false,
+		}
 	}
 
-	return itemID, mediaSourceID, "", false
+	return RequestParameters{
+		apiKey,
+		itemID,
+		mediaSourceID,
+		"",
+		false,
+	}
 }
 
 // getMediaForSpecialDate returns the special media configuration for the current date.
@@ -137,8 +183,8 @@ func getMediaForMissingMedia() config.SpecialMediaConfig {
 }
 
 // handleCache checks the cache for an existing streaming URL.
-func handleCache(c *gin.Context, itemID, mediaSourceID string) (string, bool) {
-	cacheKey := fmt.Sprintf("%s:%s", itemID, mediaSourceID)
+func handleCache(c *gin.Context, parameters RequestParameters) (string, bool) {
+	cacheKey := fmt.Sprintf("%s:%s", parameters.ItemId, parameters.MediaSourceID)
 	if cachedURL, found := cache.Get(cacheKey); found {
 		logger.Info("Cache hit for key: %s", cacheKey)
 		if validateSignature(cachedURL) {
@@ -153,10 +199,14 @@ func handleCache(c *gin.Context, itemID, mediaSourceID string) (string, bool) {
 }
 
 // fetchMediaPathIfNeeded fetches the media path if the date is not a special date.
-func fetchMediaPathIfNeeded(itemID, mediaSourceID, mediaPath string, isSpecialDate bool) (string, error) {
-	if !isSpecialDate {
+func fetchMediaPathIfNeeded(parameters RequestParameters) (string, error) {
+	itemID := parameters.ItemId
+	mediaSourceID := parameters.MediaSourceID
+	mediaPath := parameters.MediaPath
+
+	if !parameters.IsSpecialDate {
 		var err error
-		mediaPath, err = fetchMediaPath(itemID, mediaSourceID)
+		mediaPath, err = fetchMediaPath(parameters)
 		if err != nil {
 			missingMediaConfig := getMediaForMissingMedia()
 			itemID = missingMediaConfig.ItemId
@@ -169,11 +219,15 @@ func fetchMediaPathIfNeeded(itemID, mediaSourceID, mediaPath string, isSpecialDa
 			}
 		}
 	}
+
 	return mediaPath, nil
 }
 
 // generateAndCacheURL generates a streaming URL and caches it.
-func generateAndCacheURL(itemID, mediaSourceID, mediaPath string) (string, error) {
+func generateAndCacheURL(mediaPath string, parameters RequestParameters) (string, error) {
+	itemID := parameters.ItemId
+	mediaSourceID := parameters.MediaSourceID
+
 	streamingURL, err := generateStreamingURL(mediaPath, itemID, mediaSourceID)
 	if err != nil {
 		return "", err
@@ -214,14 +268,18 @@ func validateSignature(cachedURL string) bool {
 }
 
 // fetchMediaPath retrieves the media path from the Emby server.
-func fetchMediaPath(itemID, mediaSourceID string) (string, error) {
+func fetchMediaPath(parameters RequestParameters) (string, error) {
 	embyAPI := api.NewEmbyAPI()
-	mediaPath, err := embyAPI.GetMediaPath(itemID, mediaSourceID)
+	mediaPath, err := embyAPI.GetMediaPath(
+		parameters.EmbyApiKey,
+		parameters.ItemId,
+		parameters.MediaSourceID,
+	)
 	if err != nil {
 		logger.Error(
 			"Failed to fetch media path for itemID: %s, MediaSourceId: %s. Error: %v",
-			itemID,
-			mediaSourceID,
+			parameters.ItemId,
+			parameters.MediaSourceID,
 			err,
 		)
 		return "", fmt.Errorf("failed to fetch media path")
@@ -274,14 +332,27 @@ func generateStreamingURL(mediaPath, itemID, mediaSourceID string) (string, erro
 
 // logRequestDetails logs request headers and body for debugging purposes.
 func logRequestDetails(c *gin.Context) {
-	logger.Debug("Request Headers: %v", c.Request.Header)
+	// Construct the full URL using a more efficient approach
+	protocol := "http"
+	if c.Request.TLS != nil {
+		protocol = "https"
+	}
+	fullURL := protocol + "://" + c.Request.Host + c.Request.RequestURI
+	logger.Debug("Request URL: %s", fullURL)
+
+	// Log request headers directly (no need to format if the logger handles objects efficiently)
+	logger.Debug("Request Headers:", c.Request.Header)
+
+	// Log request body (if available)
 	if c.Request.Body != nil {
-		bodyBytes, err := io.ReadAll(c.Request.Body)
+		// Use a limited buffer to avoid unnecessary allocations for very large bodies
+		bodyBytes, err := io.ReadAll(io.LimitReader(c.Request.Body, 1024*1024)) // Limit to 1 MB
 		if err == nil {
-			c.Request.Body = io.NopCloser(strings.NewReader(string(bodyBytes)))
-			logger.Debug("Request Body: %s", string(bodyBytes))
+			// Reset the body to allow further handlers to read it
+			c.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+			logger.Debug("Request Body:", string(bodyBytes)) // Let logger handle the string formatting
 		} else {
-			logger.Warn("Failed to read request body: %v", err)
+			logger.Warn("Failed to read request body:", err)
 		}
 	}
 }
