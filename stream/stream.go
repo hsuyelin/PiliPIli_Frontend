@@ -340,19 +340,17 @@ func logRequestDetails(c *gin.Context) {
 	fullURL := protocol + "://" + c.Request.Host + c.Request.RequestURI
 	logger.Debug("Request URL: %s", fullURL)
 
-	// Log request headers directly (no need to format if the logger handles objects efficiently)
-	logger.Debug("Request Headers:", c.Request.Header)
+	// Log request headers
+	logger.Debug("Request Headers: %v", c.Request.Header)
 
 	// Log request body (if available)
 	if c.Request.Body != nil {
-		// Use a limited buffer to avoid unnecessary allocations for very large bodies
-		bodyBytes, err := io.ReadAll(io.LimitReader(c.Request.Body, 1024*1024)) // Limit to 1 MB
+		bodyBytes, err := io.ReadAll(io.LimitReader(c.Request.Body, 1024*1024))
 		if err == nil {
-			// Reset the body to allow further handlers to read it
 			c.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
-			logger.Debug("Request Body:", string(bodyBytes)) // Let logger handle the string formatting
+			logger.Debug("Request Body: %s", string(bodyBytes))
 		} else {
-			logger.Warn("Failed to read request body:", err)
+			logger.Warn("Failed to read request body: %v", err)
 		}
 	}
 }
