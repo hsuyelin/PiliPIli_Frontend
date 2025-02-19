@@ -284,15 +284,19 @@ func fetchMediaPath(parameters RequestParameters) (string, error) {
 		)
 		return "", fmt.Errorf("failed to fetch media path")
 	}
-	logger.Debug("Fetched original media path: %s", mediaPath)
+	logger.Info("Fetched original media path: %s", mediaPath)
 
 	backendStorageBasePath := config.GetConfig().BackendStorageBasePath
+	frontendSymlinkBasePath := config.GetConfig().FrontendSymlinkBasePath
 	if backendStorageBasePath != "" && strings.HasPrefix(mediaPath, backendStorageBasePath) {
 		mediaPath = strings.TrimPrefix(mediaPath, backendStorageBasePath)
 		mediaPath = strings.TrimPrefix(mediaPath, "/")
+	} else if frontendSymlinkBasePath != "" && strings.HasPrefix(mediaPath, frontendSymlinkBasePath) {
+		mediaPath = strings.TrimPrefix(mediaPath, frontendSymlinkBasePath)
+		mediaPath = strings.TrimPrefix(mediaPath, "/")
 	}
 
-	logger.Debug("Processed media path: %s", mediaPath)
+	logger.Info("Processed media path: %s", mediaPath)
 	return mediaPath, nil
 }
 

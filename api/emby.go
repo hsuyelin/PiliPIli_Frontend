@@ -74,7 +74,7 @@ func (api *EmbyAPI) GetMediaPath(apiKey, itemID, mediaSourceID string) (string, 
 
 	for _, source := range result.MediaSources {
 		if source.ID == mediaSourceID {
-			logger.Info("Found media path: %s", source.Path)
+			logger.Debug("Found media path: %s", source.Path)
 			return source.Path, nil
 		}
 	}

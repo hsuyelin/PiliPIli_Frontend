@@ -101,6 +101,8 @@ SpecialMedias:
 	* url: Emby服务部署的地址，如果前端程序和Emby服务在一台机器上，可以使用`http://127.0.0.1`
 	* port: Emby服务部署的端口，一般是`8096`，按需设置
 	* apikey：Emby服务的`APIKey`，用于向Emby服务获取媒体文件地址
+- **Frontend**:
+	- **symlinkBasePath**: 专门为使用strm的媒体库使用.
 * Backend：
 	* url：远程推流的地址
 		* 如果是`http`必须要要加端口号，例如：`http://ip:port`

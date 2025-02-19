@@ -7,16 +7,17 @@ import (
 
 // Config holds all configuration values.
 type Config struct {
-	LogLevel               string               // Log level (e.g., INFO, DEBUG, ERROR)
-	Encipher               string               // Key used for encryption and obfuscation
-	EmbyURL                string               // Emby server URL
-	EmbyPort               int                  // Emby server port
-	EmbyAPIKey             string               // API key for Emby server
-	BackendURL             string               // Backend streaming server URL
-	BackendStorageBasePath string               // Backend streaming storage base path
-	PlayURLMaxAliveTime    int                  // Maximum lifetime of the play URL
-	ServerPort             int                  // Server port
-	SpecialMedias          []SpecialMediaConfig // Special media configurations as a list
+	LogLevel                string               // Log level (e.g., INFO, DEBUG, ERROR)
+	Encipher                string               // Key used for encryption and obfuscation
+	EmbyURL                 string               // Emby server URL
+	EmbyPort                int                  // Emby server port
+	EmbyAPIKey              string               // API key for Emby server
+	FrontendSymlinkBasePath string               // Frontend symlink base path
+	BackendURL              string               // Backend streaming server URL
+	BackendStorageBasePath  string               // Backend streaming storage base path
+	PlayURLMaxAliveTime     int                  // Maximum lifetime of the play URL
+	ServerPort              int                  // Server port
+	SpecialMedias           []SpecialMediaConfig // Special media configurations as a list
 }
 
 // SpecialMediaConfig holds the media path and source ID for a specific media.
@@ -42,30 +43,32 @@ func Initialize(configFile string, loglevel string) error {
 	if err := viper.ReadInConfig(); err != nil {
 		// Default configuration
 		globalConfig = Config{
-			LogLevel:               defaultLogLevel(loglevel),
-			Encipher:               "vPQC5LWCN2CW2opz",
-			EmbyURL:                "http://127.0.0.1",
-			EmbyPort:               8096,
-			EmbyAPIKey:             "",
-			BackendURL:             "",
-			BackendStorageBasePath: "",
-			PlayURLMaxAliveTime:    6 * 60 * 60,
-			ServerPort:             60002,
-			SpecialMedias:          []SpecialMediaConfig{},
+			LogLevel:                defaultLogLevel(loglevel),
+			Encipher:                "vPQC5LWCN2CW2opz",
+			EmbyURL:                 "http://127.0.0.1",
+			EmbyPort:                8096,
+			EmbyAPIKey:              "",
+			FrontendSymlinkBasePath: "",
+			BackendURL:              "",
+			BackendStorageBasePath:  "",
+			PlayURLMaxAliveTime:     6 * 60 * 60,
+			ServerPort:              60002,
+			SpecialMedias:           []SpecialMediaConfig{},
 		}
 	} else {
 		// Load configuration from file
 		globalConfig = Config{
-			LogLevel:               getLogLevel(loglevel),
-			Encipher:               viper.GetString("Encipher"),
-			EmbyURL:                viper.GetString("Emby.url"),
-			EmbyPort:               viper.GetInt("Emby.port"),
-			EmbyAPIKey:             viper.GetString("Emby.apiKey"),
-			BackendURL:             viper.GetString("Backend.url"),
-			BackendStorageBasePath: viper.GetString("Backend.storageBasePath"),
-			PlayURLMaxAliveTime:    viper.GetInt("PlayURLMaxAliveTime"),
-			ServerPort:             viper.GetInt("Server.port"),
-			SpecialMedias:          loadSpecialMedias(),
+			LogLevel:                getLogLevel(loglevel),
+			Encipher:                viper.GetString("Encipher"),
+			EmbyURL:                 viper.GetString("Emby.url"),
+			EmbyPort:                viper.GetInt("Emby.port"),
+			EmbyAPIKey:              viper.GetString("Emby.apiKey"),
+			FrontendSymlinkBasePath: viper.GetString("Frontend.symlinkBasePath"),
+			BackendURL:              viper.GetString("Backend.url"),
+			BackendStorageBasePath:  viper.GetString("Backend.storageBasePath"),
+			PlayURLMaxAliveTime:     viper.GetInt("PlayURLMaxAliveTime"),
+			ServerPort:              viper.GetInt("Server.port"),
+			SpecialMedias:           loadSpecialMedias(),
 		}
 	}
 

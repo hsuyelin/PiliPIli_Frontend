@@ -52,6 +52,10 @@ Emby:
   port: 8096
   apiKey: "6a15d65893024675ba89ffee165f8f1c"  # API key for accessing the Emby server
 
+# Frontend related configuration
+Frontend:
+	symlinkBasePath: "/mnt/symlink" # Design for media library for symlink
+	
 # Backend streaming configuration
 Backend:
     url: "https://streamer.xxxxxxxx.com/stream" # The backend URL for streaming service
@@ -106,6 +110,9 @@ SpecialMedias:
 	- **url**: The address where the Emby service is deployed. If the frontend application and the Emby service are on the same machine, `http://127.0.0.1` can be used.
 	- **port**: The port where the Emby service is deployed, usually `8096`. Configure as needed.
 	- **apikey**: The `APIKey` for the Emby service, used to retrieve media file URLs from the Emby service.
+
+- **Frontend**:
+	- **symlinkBasePath**: Design for media library for strm.
 
 - **Backend**:
 	- **url**: The URL for remote streaming.

@@ -10,6 +10,10 @@ Emby:
   port: 8096
   apiKey: "6a15d65893024675ba89ffee165f8f1c"  # API key for accessing the Emby server
 
+# Frontend related configuration
+Frontend:
+  symlinkBasePath: "/mnt/symlink" # Design for media library for strm
+
 # Backend streaming configuration
 Backend:
   url: "https://streamer.xxxxxxxx.com/stream" # The backend URL for streaming service
