@@ -12,7 +12,7 @@ RUN go mod download
 COPY . .
 
 # Compile the binary, disable CGO, and optimize for size
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o emby_fronted main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o emby_frontend main.go
 
 # Second stage, using a minimal alpine image as the base
 FROM alpine:3.21
@@ -21,9 +21,9 @@ FROM alpine:3.21
 WORKDIR /app
 
 # Copy the compiled binary from the builder stage
-COPY --from=builder /app/emby_fronted /app/emby_fronted
+COPY --from=builder /app/emby_frontend /app/emby_frontend
 # Copy the configuration file
 COPY config.yaml /app/config.yaml
 
 # Set the default command to run the binary
-CMD ["/app/emby_fronted", "/app/config.yaml"]
+CMD ["/app/emby_frontend", "/app/config.yaml"]

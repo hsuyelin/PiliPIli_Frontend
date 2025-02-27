@@ -187,10 +187,10 @@ go version #显示 go version go1.23.5 linux/amd64 就是安装成功
 
 #### 2.2 克隆前端程序组到本地
 
-假如你需要克隆到`/data/emby_fronted`这个目录
+假如你需要克隆到`/data/emby_frontend`这个目录
 
 ```shell
-git clone https://github.com/hsuyelin/PiliPili_Frontend.git /data/emby_fronted
+git clone https://github.com/hsuyelin/PiliPili_Frontend.git /data/emby_frontend
 ```
 
 #### 2.3 进入前端程序目录编辑配置文件

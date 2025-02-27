@@ -202,10 +202,10 @@ go version
 
 #### 2.2: Clone the Frontend Repository
 
-Clone the repository into a directory, e.g., `/data/emby_fronted`.
+Clone the repository into a directory, e.g., `/data/emby_frontend`.
 
 ```bash
-git clone https://github.com/hsuyelin/PiliPili_Frontend.git /data/emby_fronted
+git clone https://github.com/hsuyelin/PiliPili_Frontend.git /data/emby_frontend
 ```
 
 ------
