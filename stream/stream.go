@@ -64,15 +64,15 @@ func HandleStreamRequest(c *gin.Context) {
 
 	// Fetch media path if it is not a special date.
 	var err error
-	var mediaPath string
-	mediaPath, err = fetchMediaPathIfNeeded(requestParameters)
+	var mediaPath, basePath string
+	mediaPath, basePath, err = fetchMediaPathIfNeeded(requestParameters)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	// Generate and cache the streaming URL.
-	streamingURL, err := generateAndCacheURL(mediaPath, requestParameters)
+	streamingURL, err := generateAndCacheURL(mediaPath, basePath, requestParameters)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -199,36 +199,37 @@ func handleCache(c *gin.Context, parameters RequestParameters) (string, bool) {
 }
 
 // fetchMediaPathIfNeeded fetches the media path if the date is not a special date.
-func fetchMediaPathIfNeeded(parameters RequestParameters) (string, error) {
+func fetchMediaPathIfNeeded(parameters RequestParameters) (string, string, error) {
 	itemID := parameters.ItemId
 	mediaSourceID := parameters.MediaSourceID
 	mediaPath := parameters.MediaPath
+	basePath := ""
 
 	if !parameters.IsSpecialDate {
 		var err error
-		mediaPath, err = fetchMediaPath(parameters)
+		mediaPath, basePath, err = fetchMediaPath(parameters)
 		if err != nil {
 			missingMediaConfig := getMediaForMissingMedia()
 			itemID = missingMediaConfig.ItemId
 			mediaSourceID = missingMediaConfig.MediaSourceID
 			if itemID == "" || mediaSourceID == "" {
 				logger.Error("Missing itemID or MediaSourceId")
-				return "", err
+				return "", "", err
 			} else {
 				mediaPath = missingMediaConfig.MediaPath
 			}
 		}
 	}
 
-	return mediaPath, nil
+	return mediaPath, basePath, nil
 }
 
 // generateAndCacheURL generates a streaming URL and caches it.
-func generateAndCacheURL(mediaPath string, parameters RequestParameters) (string, error) {
+func generateAndCacheURL(mediaPath string, basePath string, parameters RequestParameters) (string, error) {
 	itemID := parameters.ItemId
 	mediaSourceID := parameters.MediaSourceID
 
-	streamingURL, err := generateStreamingURL(mediaPath, itemID, mediaSourceID)
+	streamingURL, err := generateStreamingURL(mediaPath, basePath, itemID, mediaSourceID)
 	if err != nil {
 		return "", err
 	}
@@ -268,7 +269,7 @@ func validateSignature(cachedURL string) bool {
 }
 
 // fetchMediaPath retrieves the media path from the Emby server.
-func fetchMediaPath(parameters RequestParameters) (string, error) {
+func fetchMediaPath(parameters RequestParameters) (string, string, error) {
 	embyAPI := api.NewEmbyAPI()
 	mediaPath, err := embyAPI.GetMediaPath(
 		parameters.EmbyApiKey,
@@ -282,37 +283,45 @@ func fetchMediaPath(parameters RequestParameters) (string, error) {
 			parameters.MediaSourceID,
 			err,
 		)
-		return "", fmt.Errorf("failed to fetch media path")
+		return "", "", fmt.Errorf("failed to fetch media path")
 	}
 	logger.Info("Fetched original media path: %s", mediaPath)
 
-	backendStorageBasePath := config.GetConfig().BackendStorageBasePath
+	backendConfigs := config.GetConfig().Backends
 	frontendSymlinkBasePath := config.GetConfig().FrontendSymlinkBasePath
-	if backendStorageBasePath != "" && strings.HasPrefix(mediaPath, backendStorageBasePath) {
-		mediaPath = strings.TrimPrefix(mediaPath, backendStorageBasePath)
-		mediaPath = strings.TrimPrefix(mediaPath, "/")
-	} else if frontendSymlinkBasePath != "" && strings.HasPrefix(mediaPath, frontendSymlinkBasePath) {
+	for _, cfg := range backendConfigs {
+		if cfg.StorageBasePath != "" && strings.HasPrefix(mediaPath, cfg.StorageBasePath) {
+			mediaPath = strings.TrimPrefix(mediaPath, cfg.StorageBasePath)
+			mediaPath = strings.TrimPrefix(mediaPath, "/")
+			logger.Info("Processed media path: %s at %s", mediaPath, cfg.StorageBasePath)
+			return mediaPath, cfg.StorageBasePath, nil
+		}
+	}
+	if frontendSymlinkBasePath != "" && strings.HasPrefix(mediaPath, frontendSymlinkBasePath) {
 		mediaPath = strings.TrimPrefix(mediaPath, frontendSymlinkBasePath)
 		mediaPath = strings.TrimPrefix(mediaPath, "/")
+		logger.Info("Processed media path: %s at %s", mediaPath, frontendSymlinkBasePath)
+		return mediaPath, frontendSymlinkBasePath, nil
 	}
 
 	logger.Info("Processed media path: %s", mediaPath)
-	return mediaPath, nil
+	return mediaPath, "", nil
 }
 
 // generateStreamingURL creates a signed streaming URL with a signature.
-func generateStreamingURL(mediaPath, itemID, mediaSourceID string) (string, error) {
+func generateStreamingURL(mediaPath string, basePath string, itemID string, mediaSourceID string) (string, error) {
 	cfg := config.GetConfig()
 	signatureInstance, _ := GetSignatureInstance()
 	expireAt := time.Now().Unix() + int64(cfg.PlayURLMaxAliveTime)
 	signature, err := signatureInstance.Encrypt(itemID, mediaSourceID, expireAt)
 	logger.Debug(
-		"Generated signature: itemID: %s, mediaSourceID %s, expireAt %d, signature %s, mediaPath: %s",
+		"Generated signature: itemID: %s, mediaSourceID %s, expireAt %d, signature %s, mediaPath: %s, basePath: %s",
 		itemID,
 		mediaSourceID,
 		expireAt,
 		signature,
 		mediaPath,
+		basePath,
 	)
 
 	if err != nil {
@@ -326,7 +335,7 @@ func generateStreamingURL(mediaPath, itemID, mediaSourceID string) (string, erro
 	}
 	streamingURL := fmt.Sprintf(
 		"%s?path=%s&signature=%s",
-		config.GetFullBackendURL(),
+		config.GetFullBackendURL(basePath),
 		url.QueryEscape(mediaPath),
 		signature,
 	)

@@ -49,10 +49,14 @@ Emby:
   port: 8096
   apiKey: "6a15d65893024675ba89ffee165f8f1c"  # API key for accessing the Emby server
 
-# Backend streaming configuration
-Backend:
-    url: "https://streamer.xxxxxxxx.com/stream" # The backend URL for streaming service
+# Backends streaming configuration
+Backends:
+  - url: "https://streamer1.xxxxxxxx.com/stream" # The backend URL for streaming service
     storageBasePath: "/mnt/anime"
+  - url: "https://streamer2.xxxxxxxx.com/stream" # The backend URL for streaming service
+    storageBasePath: "/mnt/tv"
+  - url: "https://streamer3.xxxxxxxx.com/stream" # The backend URL for streaming service
+    storageBasePath: "/mnt/movie"
 
 # Streaming configuration
 PlayURLMaxAliveTime: 21600 # Maximum lifetime of the play URL in seconds (e.g., 6 hours)
@@ -204,10 +208,14 @@ Emby:
   port: 8096
   apiKey: "6a15d65893024675ba89ffee165f8f1c"  # API key for accessing the Emby server
 
-# Backend streaming configuration
-Backend:
-    url: "https://streamer.xxxxxxxx.com/stream" # The backend URL for streaming service
+# Backends streaming configuration
+Backends:
+  - url: "https://streamer1.xxxxxxxx.com/stream" # The backend URL for streaming service
     storageBasePath: "/mnt/anime"
+  - url: "https://streamer2.xxxxxxxx.com/stream" # The backend URL for streaming service
+    storageBasePath: "/mnt/tv"
+  - url: "https://streamer3.xxxxxxxx.com/stream" # The backend URL for streaming service
+    storageBasePath: "/mnt/movie"
 
 # Streaming configuration
 PlayURLMaxAliveTime: 21600 # Maximum lifetime of the play URL in seconds (e.g., 6 hours)

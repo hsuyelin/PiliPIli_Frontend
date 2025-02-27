@@ -13,11 +13,16 @@ type Config struct {
 	EmbyPort                int                  // Emby server port
 	EmbyAPIKey              string               // API key for Emby server
 	FrontendSymlinkBasePath string               // Frontend symlink base path
-	BackendURL              string               // Backend streaming server URL
-	BackendStorageBasePath  string               // Backend streaming storage base path
+	Backends                []BackendConfig      // Multiple backend streaming configurations
 	PlayURLMaxAliveTime     int                  // Maximum lifetime of the play URL
 	ServerPort              int                  // Server port
 	SpecialMedias           []SpecialMediaConfig // Special media configurations as a list
+}
+
+// BackendConfig holds configuration for a single backend.
+type BackendConfig struct {
+	URL             string // Backend streaming server URL
+	StorageBasePath string // Backend storage base path
 }
 
 // SpecialMediaConfig holds the media path and source ID for a specific media.
@@ -49,10 +54,9 @@ func Initialize(configFile string, loglevel string) error {
 			EmbyPort:                8096,
 			EmbyAPIKey:              "",
 			FrontendSymlinkBasePath: "",
-			BackendURL:              "",
-			BackendStorageBasePath:  "",
+			Backends:                []BackendConfig{},
 			PlayURLMaxAliveTime:     6 * 60 * 60,
-			ServerPort:              60002,
+			ServerPort:              60001,
 			SpecialMedias:           []SpecialMediaConfig{},
 		}
 	} else {
@@ -64,8 +68,7 @@ func Initialize(configFile string, loglevel string) error {
 			EmbyPort:                viper.GetInt("Emby.port"),
 			EmbyAPIKey:              viper.GetString("Emby.apiKey"),
 			FrontendSymlinkBasePath: viper.GetString("Frontend.symlinkBasePath"),
-			BackendURL:              viper.GetString("Backend.url"),
-			BackendStorageBasePath:  viper.GetString("Backend.storageBasePath"),
+			Backends:                loadBackends(),
 			PlayURLMaxAliveTime:     viper.GetInt("PlayURLMaxAliveTime"),
 			ServerPort:              viper.GetInt("Server.port"),
 			SpecialMedias:           loadSpecialMedias(),
@@ -73,6 +76,17 @@ func Initialize(configFile string, loglevel string) error {
 	}
 
 	return nil
+}
+
+// loadBackends parses the Backends configuration from viper.
+func loadBackends() []BackendConfig {
+	var backends []BackendConfig
+
+	if err := viper.UnmarshalKey("Backends", &backends); err != nil {
+		return []BackendConfig{}
+	}
+
+	return backends
 }
 
 // loadSpecialMedias parses the SpecialMedias configuration from viper.
@@ -106,8 +120,16 @@ func GetFullEmbyURL() string {
 }
 
 // GetFullBackendURL returns the complete Backend URL.
-func GetFullBackendURL() string {
-	return util.BuildFullURL(globalConfig.BackendURL, 0)
+func GetFullBackendURL(basePath string) string {
+	for _, backend := range globalConfig.Backends {
+		if backend.StorageBasePath == basePath {
+			return util.BuildFullURL(backend.URL, 0)
+		}
+	}
+	if len(globalConfig.Backends) == 0 {
+		return ""
+	}
+	return util.BuildFullURL(globalConfig.Backends[0].URL, 0)
 }
 
 // defaultLogLevel returns the default log level if no log level is specified.
