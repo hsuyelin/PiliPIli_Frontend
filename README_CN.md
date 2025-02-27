@@ -49,10 +49,14 @@ Emby:
   port: 8096
   apiKey: "6a15d65893024675ba89ffee165f8f1c"  # API key for accessing the Emby server
 
-# Backend streaming configuration
-Backend:
-    url: "https://streamer.xxxxxxxx.com/stream" # The backend URL for streaming service
+# Backends streaming configuration
+Backends:
+  - url: "https://streamer1.xxxxxxxx.com/stream" # The backend URL for streaming service
     storageBasePath: "/mnt/anime"
+  - url: "https://streamer2.xxxxxxxx.com/stream" # The backend URL for streaming service
+    storageBasePath: "/mnt/tv"
+  - url: "https://streamer3.xxxxxxxx.com/stream" # The backend URL for streaming service
+    storageBasePath: "/mnt/movie"
 
 # Streaming configuration
 PlayURLMaxAliveTime: 21600 # Maximum lifetime of the play URL in seconds (e.g., 6 hours)
@@ -183,10 +187,10 @@ go version #显示 go version go1.23.5 linux/amd64 就是安装成功
 
 #### 2.2 克隆前端程序组到本地
 
-假如你需要克隆到`/data/emby_fronted`这个目录
+假如你需要克隆到`/data/emby_frontend`这个目录
 
 ```shell
-git clone https://github.com/hsuyelin/PiliPili_Frontend.git /data/emby_fronted
+git clone https://github.com/hsuyelin/PiliPili_Frontend.git /data/emby_frontend
 ```
 
 #### 2.3 进入前端程序目录编辑配置文件
@@ -204,10 +208,14 @@ Emby:
   port: 8096
   apiKey: "6a15d65893024675ba89ffee165f8f1c"  # API key for accessing the Emby server
 
-# Backend streaming configuration
-Backend:
-    url: "https://streamer.xxxxxxxx.com/stream" # The backend URL for streaming service
+# Backends streaming configuration
+Backends:
+  - url: "https://streamer1.xxxxxxxx.com/stream" # The backend URL for streaming service
     storageBasePath: "/mnt/anime"
+  - url: "https://streamer2.xxxxxxxx.com/stream" # The backend URL for streaming service
+    storageBasePath: "/mnt/tv"
+  - url: "https://streamer3.xxxxxxxx.com/stream" # The backend URL for streaming service
+    storageBasePath: "/mnt/movie"
 
 # Streaming configuration
 PlayURLMaxAliveTime: 21600 # Maximum lifetime of the play URL in seconds (e.g., 6 hours)
